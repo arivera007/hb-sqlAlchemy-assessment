@@ -16,16 +16,38 @@ class Brand(db.Model):
     """Car brand."""
 
     __tablename__ = "brands"
+    
+    brand_id = db.Column(db.String(5), primary_key = True)
+    name     = db.Column(db.String(50), nullable = False)
+    founded  = db.Column(db.Integer)
+    headquarters = db.Column(db.String(50))
+    discontinued = db.Column(db.Integer)
 
-    pass
+    def __repr__(self):
+        """ Returns info about the brand row """
+        
+        return "< Brand Id: %s, name: %s  >" % (self.brand_id, self.name)
 
 
 class Model(db.Model):
     """Car model."""
 
     __tablename__ = "models"
+    
+    model_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    year     = db.Column(db.Integer, nullable = False)
+    name     = db.Column(db.String(50), nullable = False)
 
-    pass
+    brand_id = db.Column(db.String(5), db.ForeignKey('brands.brand_id'))
+    
+    brand = db.relationship('Brand')
+    
+    
+    def __repr__(self):
+        """ Returns info about the brand row """
+        
+        return "< Model Id: %s, name: %s  >" % (self.model_id, self.name)
+
 
 # End Part 1
 
