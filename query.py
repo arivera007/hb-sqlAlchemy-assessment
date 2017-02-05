@@ -22,7 +22,7 @@ init_app()
 
 # 1. What is the datatype of the returned value of
 # ``Brand.query.filter_by(name='Ford')``?
-
+# BaseQuery. It is an object of the Query type. Still hasn't gone to the DB, it just has the order.
 
 
 # 2. In your own words, what is an association table, and what type of
@@ -37,29 +37,39 @@ init_app()
 
 
 # Get the brand with the ``id`` of "ram."
-q1 = "your query here"
+q1 = db.session.query(Brand.name).filter(Brand.brand_id == 'ram').all()[0][0]   # or ...
+q1 = Brand.query.filter(Brand.brand_id == 'ram').all()[0].name                  #or ...
+q1 = Brand.query.filter(Brand.brand_id == 'ram').first().name
 
 # Get all models with the name "Corvette" and the brand_id "che."
-q2 = "your query here"
+q2 = Model.query.filter(Model.brand_id == 'che', Model.name == 'Corvette').all()    # 0r ...
+q2 = Model.query.filter(Model.name == 'Corvette').all()   # Since all Corvette are che, we could ommit filter by 'che'
 
 # Get all models that are older than 1960.
-q3 = "your query here"
+q3 = db.session.query(Model).filter(Model.year < 1960).all()        # or ...
+q3 = Model.query.filter(Model.year < 1960).all()
 
 # Get all brands that were founded after 1920.
-q4 = "your query here"
+q4 = db.session.query(Brand).filter(Brand.founded > 1920).all()     # or ...
+q4 = Brand.query.filter(Brand.founded > 1920).all()
 
 # Get all models with names that begin with "Cor."
-q5 = "your query here"
+q5 = db.session.query(Model).filter(Model.name.like('Cor%')).all()  # or ...
+q5 = Model.query.filter(Model.name.like('Cor%')).all()
 
 # Get all brands that were founded in 1903 and that are not yet discontinued.
-q6 = "your query here"
+q6 = db.session.query(Brand).filter(Brand.founded == 1903, Brand.discontinued.is_(None)).all()    # or ...
+q6 = Brand.query.filter(Brand.founded == 1903, Brand.discontinued.is_(None)).all()                # or ...
+Brand.query.filter((Brand.founded == 1903) & (Brand.discontinued.is_(None))).all()
 
 # Get all brands that are either 1) discontinued (at any time) or 2) founded
 # before 1950.
-q7 = "your query here"
+q7 = Brand.query.filter(db.or_(Brand.founded < 1950, Brand.discontinued.isnot(None))).all()     # or ...
+q7 = Brand.query.filter((Brand.founded < 1950) | (Brand.discontinued.isnot(None))).all()
+
 
 # Get any model whose brand_id is not "for."
-q8 = "your query here"
+q8 = Brand.query.filter(Brand.brand_id != 'for').all()
 
 
 
