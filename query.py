@@ -22,25 +22,36 @@ init_app()
 
 # 1. What is the datatype of the returned value of
 # ``Brand.query.filter_by(name='Ford')``?
-# BaseQuery. It is an object of the Query type. Still hasn't gone to the DB, it just has the order.
+# It returns a Query object ready to be run if we execute it with all(), one() or first()
+# It has no data, just to order(query) ready to be run and get the rows.
+# In this particular case, the query is a simple "select * from brands where name='ford'""
 
 
 # 2. In your own words, what is an association table, and what type of
 # relationship (many to one, many to many, one to one, etc.) does an
 # association table manage?
 
-# TODO: - Answer questions, checke the queries returning the data and not the objects. Function 2. Join ?
-# TODO: Play with debug to see how many time a query is call in the comprehension (Func 1 and 2)
+# An association table manages many to many relationships. In order to be able to work with 'many to many' relatioships
+# among two tables we need to establish an additional assocition table. This table includes the primary keys of those other 
+# 2 tables as both foreign keys and primary key (or two foreing and one primary). 
+# Example: A patient can have many doctors, and doctors can have many patients.
+
 
 
 # -------------------------------------------------------------------
 # Part 3: SQLAlchemy Queries
 
+# ADRIANA's comment: Not sure if these queries are suppoused to return only the objects or all the fields of each row.
+# For the first query, I got the name of the brand instead of the object. 
+# For the remainder queries, I returned objects.
+# Also, I put several solutions to each query so I can have in my github for later reference. 
+# The last solution for each query, can be the one graded, they were all tested.
 
 # Get the brand with the ``id`` of "ram."
 q1 = db.session.query(Brand.name).filter(Brand.brand_id == 'ram').all()[0][0]   # or ...
-q1 = Brand.query.filter(Brand.brand_id == 'ram').all()[0].name                  #or ...
-q1 = Brand.query.filter(Brand.brand_id == 'ram').first().name
+q1 = Brand.query.filter(Brand.brand_id == 'ram').all()[0].name                  # or ...
+q1 = Brand.query.filter(Brand.brand_id == 'ram').first().name                   # or ...
+q1 = Brand.query.filter(Brand.brand_id == 'ram').one().name
 
 # Get all models with the name "Corvette" and the brand_id "che."
 q2 = Model.query.filter(Model.name == 'Corvette').all()   # Since all Corvette are che, we could ommit filter by 'che'
@@ -84,7 +95,8 @@ def get_model_info(year):
 
     # Add join to eagerly load ?
     models_for_year = db.session.query(Model).filter(Model.year == year).all()
-    print [(model.name, model.brand.name, model.brand.headquarters) for model in models_for_year]
+    for model in models_for_year:
+        print model.name, '\t', model.brand.name, '\t', model.brand.headquarters
     
 
 
@@ -92,8 +104,9 @@ def get_brands_summary():
     """Prints out each brand name and each model name with year for that brand
     using only ONE database query."""
 
-    # db.session.query(Model.brand.name, Model.name, Model.year).order_by(Model.brand_id).all()  #not seure od Model.brand.name
-    # db.session.query(Model.name, Model.year).order_by(Model.brand_id).all() # Works
+    records_list = db.session.query(Brand.name, Model.name, Model.year).join(Model).order_by(Model.brand_id).all()
+    for record in records_list:
+        print record[0], '\t\t',record[1], '\t\t',record[2]
 
 def search_brands_by_name(mystr):
     """Returns all Brand objects corresponding to brands whose names include
