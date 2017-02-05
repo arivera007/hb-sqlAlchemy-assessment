@@ -29,7 +29,8 @@ init_app()
 # relationship (many to one, many to many, one to one, etc.) does an
 # association table manage?
 
-
+# TODO: - Answer questions, checke the queries returning the data and not the objects. Function 2. Join ?
+# TODO: Play with debug to see how many time a query is call in the comprehension (Func 1 and 2)
 
 
 # -------------------------------------------------------------------
@@ -42,8 +43,8 @@ q1 = Brand.query.filter(Brand.brand_id == 'ram').all()[0].name                  
 q1 = Brand.query.filter(Brand.brand_id == 'ram').first().name
 
 # Get all models with the name "Corvette" and the brand_id "che."
-q2 = Model.query.filter(Model.brand_id == 'che', Model.name == 'Corvette').all()    # 0r ...
 q2 = Model.query.filter(Model.name == 'Corvette').all()   # Since all Corvette are che, we could ommit filter by 'che'
+q2 = Model.query.filter(Model.brand_id == 'che', Model.name == 'Corvette').all()    # this is what is asked though.
 
 # Get all models that are older than 1960.
 q3 = db.session.query(Model).filter(Model.year < 1960).all()        # or ...
@@ -60,7 +61,7 @@ q5 = Model.query.filter(Model.name.like('Cor%')).all()
 # Get all brands that were founded in 1903 and that are not yet discontinued.
 q6 = db.session.query(Brand).filter(Brand.founded == 1903, Brand.discontinued.is_(None)).all()    # or ...
 q6 = Brand.query.filter(Brand.founded == 1903, Brand.discontinued.is_(None)).all()                # or ...
-Brand.query.filter((Brand.founded == 1903) & (Brand.discontinued.is_(None))).all()
+q6 = Brand.query.filter((Brand.founded == 1903) & (Brand.discontinued.is_(None))).all()
 
 # Get all brands that are either 1) discontinued (at any time) or 2) founded
 # before 1950.
@@ -81,26 +82,31 @@ def get_model_info(year):
     """Takes in a year and prints out each model name, brand name, and brand
     headquarters for that year using only ONE database query."""
 
-    pass
+    # Add join to eagerly load ?
+    models_for_year = db.session.query(Model).filter(Model.year == year).all()
+    print [(model.name, model.brand.name, model.brand.headquarters) for model in models_for_year]
+    
 
 
 def get_brands_summary():
     """Prints out each brand name and each model name with year for that brand
     using only ONE database query."""
 
-    pass
-
+    # db.session.query(Model.brand.name, Model.name, Model.year).order_by(Model.brand_id).all()  #not seure od Model.brand.name
+    # db.session.query(Model.name, Model.year).order_by(Model.brand_id).all() # Works
 
 def search_brands_by_name(mystr):
     """Returns all Brand objects corresponding to brands whose names include
     the given string."""
 
-    pass
+    partial_brand = '%%%s%%' % mystr
+    
+    return Brand.query.filter(Brand.name.like(partial_brand)).all()
 
 
 def get_models_between(start_year, end_year):
     """Returns all Model objects corresponding to models made between
     start_year (inclusive) and end_year (exclusive)."""
 
-    pass
+    return Model.query.filter(Model.year >= start_year, Model.year < end_year).all()
 
